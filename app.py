@@ -4,10 +4,11 @@ from flasgger import Swagger
 import random
 import time
 import threading
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # Swagger configuration
 swagger_config = {
@@ -153,4 +154,9 @@ if __name__ == '__main__':
     location_thread.start()
     
     # Run the Socket.IO server
-    socketio.run(app, debug=True, host='0.0.0.0', port=5002) 
+    if os.environ.get('FLASK_ENV') == 'production':
+        import eventlet
+        eventlet.monkey_patch()
+        socketio.run(app, host='0.0.0.0', port=5002, allow_unsafe_werkzeug=True)
+    else:
+        socketio.run(app, debug=True, host='0.0.0.0', port=5002) 

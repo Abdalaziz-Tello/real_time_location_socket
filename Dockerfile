@@ -16,5 +16,9 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 5002
 
-# Command to run the application
-CMD ["python", "app.py"] 
+# Set environment variables
+ENV FLASK_ENV=production
+ENV FLASK_APP=app.py
+
+# Command to run the application with Gunicorn
+CMD ["gunicorn", "--worker-class", "eventlet", "--workers", "1", "--bind", "0.0.0.0:5002", "app:app"] 
