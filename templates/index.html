@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Location Updates</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #location-data {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .location-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Location Updates</h1>
+    <div id="location-data"></div>
+
+    <script>
+        const socket = io();
+        const locationData = document.getElementById('location-data');
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('location_update', (data) => {
+            const locationItem = document.createElement('div');
+            locationItem.className = 'location-item';
+            locationItem.innerHTML = `
+                <strong>Latitude:</strong> ${data.latitude.toFixed(6)}<br>
+                <strong>Longitude:</strong> ${data.longitude.toFixed(6)}<br>
+                <strong>Timestamp:</strong> ${new Date(data.timestamp * 1000).toLocaleTimeString()}
+            `;
+            
+            locationData.insertBefore(locationItem, locationData.firstChild);
+            
+            // Keep only the last 10 updates
+            if (locationData.children.length > 10) {
+                locationData.removeChild(locationData.lastChild);
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+    </script>
+</body>
+</html> 
